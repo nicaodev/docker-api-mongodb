@@ -1,31 +1,64 @@
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Mongodb.Model;
+using WebAPI.Mongodb.Repository;
 
 namespace WebAPI.Mongodb.Controllers;
+
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController : ControllerBase
+public class WeatherForecastController : Controller
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+    private readonly IProductRepository _repository;
 
-    private readonly ILogger<WeatherForecastController> _logger;
-
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(IProductRepository repository)
     {
-        _logger = logger;
+        _repository = repository ??
+         throw new ArgumentNullException(nameof(repository));
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        var products = await _repository.GetProducts();
+        return Ok(products);
+    }
+
+    [HttpGet("{id:length(24)}", Name = "GetProduct")]
+    public async Task<ActionResult<Product>> GetProductById(string id)
+    {
+        var product = await _repository.GetProduct(id);
+
+        if (product == null)
         {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+            return NotFound();
+        }
+        return Ok(product);
+    }
+
+    [Route("[action]/{category}", Name = "GetProductByCategory")]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Product>>> GetProductByCategory(string category)
+    {
+        var products = await _repository.GetProductByCategory(category);
+        return Ok(products);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
+    {
+        await _repository.CreateProduct(product);
+        return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateProduct([FromBody] Product product)
+    {
+        return Ok(await _repository.UpdateProduct(product));
+    }
+
+    [HttpDelete("{id:length(24)}", Name = "DeleteProduct")]
+    public async Task<IActionResult> DeleteProductById(string id)
+    {
+        return Ok(await _repository.DeleteProduct(id));
     }
 }
