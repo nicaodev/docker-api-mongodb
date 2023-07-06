@@ -21,6 +21,12 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+
+
+// Subir os 2 containers e override de configs.
+
+//docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
