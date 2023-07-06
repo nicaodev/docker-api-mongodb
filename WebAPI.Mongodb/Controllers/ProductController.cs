@@ -6,11 +6,11 @@ namespace WebAPI.Mongodb.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController : Controller
+public class ProductController : Controller
 {
     private readonly IProductRepository _repository;
 
-    public WeatherForecastController(IProductRepository repository)
+    public ProductController(IProductRepository repository)
     {
         _repository = repository ??
          throw new ArgumentNullException(nameof(repository));
