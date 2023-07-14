@@ -3,6 +3,7 @@ using Microsoft.OpenApi.Models;
 using WebAPI.Mongodb.Data;
 using WebAPI.Mongodb.Data.SQLSERVERContext;
 using WebAPI.Mongodb.Repository;
+using WebAPI.Mongodb.Repository.Basket;
 using WebAPI.Mongodb.Repository.Pessoa;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,15 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ProductAPI", Version = "v1" });
 });
+
+// docker run --name local-redis -p 6379:6379 -d redis
+
+builder.Services.AddStackExchangeRedisCache(opt =>
+{
+    opt.Configuration = builder.Configuration.GetValue<string>("CacheSettings:ConnectionString");
+});
+
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 
 builder.Services.AddScoped<IProductContext, ProductContext>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

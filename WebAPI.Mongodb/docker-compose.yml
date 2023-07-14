@@ -3,6 +3,10 @@ version: '3.4'
 services:
   catalogdb:
     image: mongo
+
+  basketdb:
+    image: redis
+
   webapi.mongodb:
     image: ${DOCKER_REGISTRY-}webapimongodb
     build:
@@ -10,6 +14,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
         - sqlserver
+        - basketdb
   sqlserver:
     image: mcr.microsoft.com/mssql/server
     hostname: "sqlserver"
@@ -22,5 +27,7 @@ services:
       - "11433:1433"    
     expose:
       - 1433
+   
+      
 volumes:
   mongo_data:
